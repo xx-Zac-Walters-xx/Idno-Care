@@ -12,7 +12,7 @@ class Idno:
     cleanliness: int
 
 def create_idno() -> Idno:
-    new_name = input("Name your new idno!")
+    new_name = input("Name your new idno!\n> ")
     new_idno = Idno(
         name = new_name,
         age = 1,
@@ -22,6 +22,13 @@ def create_idno() -> Idno:
         cleanliness = 100,
     )
     return new_idno
+
+def create_save_file() -> str:
+    new_file_name = input("New save file name: ")
+    formatted_name = new_file_name.replace(" ", "_")
+    new_file = open(f"{formatted_name}.txt", "w")
+    new_file.close()
+    return f"{formatted_name}.txt"
 
 def save_idno_state(idno: Idno, filename: str) -> NoReturn:
     with open(filename, 'w') as file:
@@ -49,7 +56,6 @@ def load_idno_state(filename: str) -> Idno:
 
 def main():
     pass
-
 
 if __name__ == "__main__":
     main()
