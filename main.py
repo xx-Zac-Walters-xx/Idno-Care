@@ -11,6 +11,21 @@ class Idno:
     hunger: int
     cleanliness: int
 
+#not sure what all we need to track for the inventory
+@dataclass
+class Inventory:
+    munny: int
+    medicine: list[str]
+    toys: list[str]
+    food_units: int
+
+#store inventory and prices stored as dictionaries, open to easier ideas
+@dataclass
+class Store:
+    toys: dict[str, int] 
+    medicine: dict[str, int]
+    food: dict[int, int]
+
 def create_idno() -> Idno:
     new_name = input("Name your new idno!\n> ")
     new_idno = Idno(
@@ -53,6 +68,36 @@ def load_idno_state(filename: str) -> Idno:
             )
     except FileNotFoundError:
         return create_idno()
+
+def get_paid(user_inventory: Inventory) -> NoReturn:
+    user_inventory.munny += 5
+    print("You received 5 munny!")
+
+def buy_medicine(user_inventory: Inventory, store: Store) -> NoReturn:
+    while True:
+        print("Available medicine:")
+        for item, price in store.medicine.items():
+            print(f"  {item}: {price} munny")
+        choice = input("Which medicine would you like to buy? ")
+        if choice in store.medicine:
+            if user_inventory.munny >= store.medicine[choice]:
+                user_inventory.munny -= store.medicine[choice]
+                user_inventory.medicine.append(choice)
+                print(f"You bought {choice}!")
+                break
+            else:
+                print("You don't have enough munny! Press [exit] to leave.")
+        elif choice.lower() == "exit":
+            break
+        else:
+            print("Invalid choice.")
+
+def get_inventory(user_inventory: Inventory) -> None:
+    print("Inventory:")
+    print(f"  Munny: {user_inventory.munny}")
+    print(f"  Medicine: {', '.join(user_inventory.medicine)}")
+    print(f"  Toys: {', '.join(user_inventory.toys)}")
+    print(f"  Food Units: {user_inventory.food_units}")
 
 def main():
     pass
