@@ -20,8 +20,6 @@ class Inventory:
     food: dict[str, int]
     #changed the list to dict to have the item name and quantity
 
-
-
 #store inventory and prices stored as dictionaries, open to easier ideas
 @dataclass
 class Store:
@@ -73,9 +71,27 @@ def load_idno_state(filename: str) -> Idno:
     except FileNotFoundError:
         return create_idno()
 
-def get_paid(user_inventory: Inventory):
-    user_inventory.munny += 5
-    print("You received 5 munny!")
+def get_paid(user_inventory: Inventory, idno_status: Idno):
+    #editing so that the happier/healthier idno is, the more money the user earns
+    wage = 5
+
+    if idno_status.cleanliness >= 75:
+        wage += 1
+    elif idno_status.cleanliness <= 25:
+        wage -= 1
+
+    if idno_status.happiness >= 75:
+        wage += 1
+    elif idno_status.happiness <= 25:
+        wage -= 1
+
+    if idno_status.health >= 75:
+        wage += 1
+    elif idno_status.health <= 25:
+        wage -= 1
+
+    user_inventory.munny += wage
+    print({f"You've earned {wage} munny!"})
 
 def create_store_inventory(new_store: Store):
     #formatted as a dict with a tuple (item name, price): stock quantity,set all at 10 for now can change or randomize later
@@ -148,8 +164,15 @@ def get_inventory(user_inventory: Inventory) -> None:
     for item, quantity in user_inventory.food.items():
         print(f"{item}: {quantity} servings")
 
+#starting on the basic structure, please make changes if needed
 def main():
-    pass
+
+    filename = create_save_file()
+    idno = create_idno()
+    save_idno_state(idno, filename)
+
+    print(f"Congratulations on your new Idno! Now you must take care of {idno.name}. You must feed it and clean it, and monitor its health and happiness. At the end of each day, you get paid your wage. If {idno.name} is in good condition, you earn more munny. You can access the shop to buy supplies to care for {idno.name}. You can also access your inventory to see what supplies you already own.")
+    #probably need to format this ginormous string to fit better in the terminal but im too lazy
 
 if __name__ == "__main__":
     main()
