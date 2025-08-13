@@ -33,6 +33,33 @@ class Inventory:
 
 # im crashing out
 
+random_events = ["mess", "sickness", "growth", "sad", "happy"]
+
+def get_random_event_message(idno: Idno) -> str:
+    event_type = random.choice(random_events)
+    if event_type == "mess":
+        idno.cleanliness -= 10
+        with open("mess.txt", "r") as file:
+            return random.choice(file.readlines()).strip()
+    elif event_type == "sickness":
+        idno.health -= 10
+        with open("sickness.txt", "r") as file:
+            return random.choice(file.readlines()).strip()
+    elif event_type == "growth":
+        idno.age += 1
+        with open("growth.txt", "r") as file:
+            return random.choice(file.readlines()).strip()
+    elif event_type == "sad":
+        idno.happiness -= 10
+        with open("sad.txt", "r") as file:
+            return random.choice(file.readlines()).strip()
+    elif event_type == "happy":
+        idno.happiness += 10
+        with open("happy.txt", "r") as file:
+            return random.choice(file.readlines()).strip()
+    else:
+        return "Unknown event."
+
 def create_idno() -> Idno:
     new_name = input("Name your new Idno!\n> ")
     new_idno = Idno(
@@ -287,7 +314,7 @@ def play_with_idno(user_inventory: Inventory, idno: Idno):
 
         print(f"{idno.name}'s happiness is now {idno.happiness}/100.")
 
-def clean_idno(idno: Idno):
+def clean_idno(user_inventory: Inventory, idno: Idno):
     idno.cleanliness += 20 # i need to fix this so that the max is 100 cause we dont need it to be higher than that
     print(f"{idno.name} is now a bit cleaner!")
 
@@ -372,48 +399,74 @@ def main():
             print("Input must be either [1] or [2].")
 
     user_inventory = create_user_inventory()
-    daily_store = create_store_inventory()
 
     num_of_actions = 5
     
-    print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
-    action = int(input("> "))
-    while action != 8:
-        if num_of_actions > 0:
-            if action == 1:
-                category = input("What are you looking to buy?\n[food]\n[toys]\n[medicine]\n> ")
-                check_shop(user_inventory, daily_store, category)
-                num_of_actions -= 1
-            elif action == 2:
-                check_inventory(user_inventory)
-            elif action == 3:
-                feed_idno(user_inventory, idno)
-                num_of_actions -= 1
-            elif action == 4:
-                clean_idno(user_inventory, idno)
-                num_of_actions -= 1
-            elif action == 5:
-                play_with_idno(user_inventory, idno)
-                num_of_actions -= 1
-            elif action == 6:
-                administer_medicine(user_inventory, idno)
-                num_of_actions -= 1
-            elif action == 7:
-                print("You have chosen to end the day.")
-                #end day / adjust
-                num_of_actions = 0
+    while True:
+        print("It's a new day!")
 
-            print("What would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
-            action = int(input("> "))
+        daily_store = create_store_inventory()
+        idno.age += 1
+        idno.hunger += 10
+        idno.cleanliness -= 5
+        num_of_actions = 5
+        random_event_message = get_random_event_message(idno)
+        print(f"\n{random_event_message}\n")
 
-        else:
-            print("You are out of actions for the day!")
-            #insert function to end the day and adjust stats
+        print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
+        action = int(input("> "))
+        while num_of_actions > 0 and action != 8:
+            if num_of_actions > 0:
+                if action < 1 or action > 8:
+                    print("Invalid action. Please choose a number between 1 and 8.")
+                    action = int(input("> "))
+                    continue
+                if action == 1:
+                    category = input("What are you looking to buy?\n[food]\n[toys]\n[medicine]\n> ")
+                    check_shop(user_inventory, daily_store, category)
+                    num_of_actions -= 1
+                    print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
+                    action = int(input("> "))
+                elif action == 2:
+                    check_inventory(user_inventory)
+                    print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
+                    action = int(input("> "))
+                elif action == 3:
+                    feed_idno(user_inventory, idno)
+                    num_of_actions -= 1
+                    print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
+                    action = int(input("> "))
+                elif action == 4:
+                    clean_idno(user_inventory, idno)
+                    num_of_actions -= 1
+                    print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
+                    action = int(input("> "))
+                elif action == 5:
+                    play_with_idno(user_inventory, idno)
+                    num_of_actions -= 1
+                    print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
+                    action = int(input("> "))
+                elif action == 6:
+                    administer_medicine(user_inventory, idno)
+                    num_of_actions -= 1
+                    print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
+                    action = int(input("> "))
+                elif action == 7:
+                    print("You have chosen to end the day.")
+                    #end day / adjust
+                    num_of_actions = 0
+                # print("What would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
+                # action = int(input("> "))
 
-    if action == 8:
-        print("Ending current day and saving stats...")
-        #end day / adjust
-        save_idno_state(idno, filename)
+            else:
+                print("You are out of actions for the day!")
+                #insert function to end the day and adjust stats
+
+        if action == 8:
+            print("Ending current day and saving stats...")
+            #end day / adjust
+            save_idno_state(idno, filename)
+            break
 
 if __name__ == "__main__":
     main()
