@@ -1,4 +1,4 @@
-import random 
+import random
 from typing import NoReturn, Dict
 from dataclasses import dataclass
 
@@ -91,10 +91,11 @@ def get_paid(user_inventory: Inventory, idno_status: Idno):
         wage -= 1
 
     user_inventory.munny += wage
-    print({f"You've earned {wage} munny!"})
+    print(f"You've earned {wage} munny!")
 
-def create_store_inventory(new_store: Store):
+def create_store_inventory():
     #formatted as a dict with a tuple (item name, price): stock quantity,set all at 10 for now can change or randomize later
+    new_store = Store
     new_store.toys = {
         ("ball", 1): 10,
         ("squeaky toy", 3): 10,
@@ -111,6 +112,8 @@ def create_store_inventory(new_store: Store):
         ("kibble", 3): 10, 
         ("steak", 5):10
     }
+
+    return new_store
 
 def check_shop(user_inventory: Inventory, store_inventory: dict, category_name:str):
     while True:
@@ -271,7 +274,7 @@ def administer_medicine(user_inventory: Inventory, idno: Idno):
 
 
 
-def get_inventory(user_inventory: Inventory) -> None:
+def check_inventory(user_inventory: Inventory) -> None:
     print("Inventory:")
     print(f"  Munny: {user_inventory.munny}")
     for item, quantity in user_inventory.medicine.items():
@@ -287,15 +290,85 @@ def main():
     filename = create_save_file()
     idno = create_idno()
     save_idno_state(idno, filename)
+    # user_inventory = create_inventory()
+    # function to be added
 
     print(f"""Congratulations on your new Idno! Now you must take care of {idno.name}.
-            You must feed it and clean it, and monitor its health and happiness.
-            At the end of each day, you get paid your wage.
-            If {idno.name} is in good condition, you earn more munny.
-            You can access the shop to buy supplies to care for {idno.name}.
-            You can also access your inventory to see what supplies you already own.""")
+You must feed it and clean it, and monitor its health and happiness.
+At the end of each day, you get paid your wage.
+If {idno.name} is in good condition, you earn more munny.
+You can access the shop to buy supplies to care for {idno.name}.
+You can also access your inventory to see what supplies you already own.""")
     #probably need to format this ginormous string to fit better in the terminal but im too lazy
     #fixed formatting with triple quotes which preserve the spacing and line breaks with \n
+    #i want to move this into the create_idno() in case the user is loading a pre-existing save
+
+    num_of_actions = 5
+    
+    print("""
+What would you like to do?
+[1] check shop
+[2] check inventory
+[3] feed idno
+[4] clean idno
+[5] play with idno
+[6] administer medicine
+[7] end day
+[8] save and exit""")
+
+    action = int(input("> "))
+
+    while action != 8 or action != 7:
+        daily_store = create_store_inventory()
+        if num_of_actions > 0:
+            if action == 1:
+                category = input("""What are you looking to buy?
+[food]
+[toys]
+[medicine]""")
+                check_shop(user_inventory, daily_store, category)
+                num_of_actions -= 1
+            if action == 2:
+                check_inventory(user_inventory)
+            if action == 3:
+                feed_idno(user_inventory, idno)
+                num_of_actions -= 1
+            if action == 4:
+                pass
+                #make a function for cleaning the fucker
+                num_of_actions -= 1
+            if action == 5:
+                play_with_idno(user_inventory, idno)
+                num_of_actions -= 1
+            if action == 6:
+                administer_medicine(user_inventory, idno)
+                num_of_actions -= 1
+
+            print("""What would you like to do?
+[1] check shop
+[2] check inventory
+[3] feed idno
+[4] clean idno
+[5] play with idno
+[6] administer medicine
+[7] end day
+[8] save and exit""")
+
+            action = int(input("> "))
+
+        else:
+            print("You are out of actions for the day!")
+            #insert function to end the day and adjust stats
+            break
+
+    if action == 7:
+        print("You have chosen to end the day.")
+        #end day / adjust
+    if action == 8:
+        print("Ending current day and saving stats...")
+        #end day / adjust
+        save_idno_state(idno, filename)
+        quit
 
 if __name__ == "__main__":
     main()
