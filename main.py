@@ -396,8 +396,8 @@ def main():
         # print(f"\nWhat would you like to do? {num_of_actions} actions left.\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
         # action = int(input("> "))
 
-        try:
-            while num_of_actions > 0:
+        while num_of_actions > 0:
+            try:
                 get_idno(idno)
                 print(f"\nWhat would you like to do? {num_of_actions} actions left for today.\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
                 action = int(input("> "))
@@ -436,15 +436,29 @@ def main():
                     break
                 else:
                     print("Input must be an integer between 1 and 8.")
-            
-            if action == 8:
-                break
+            except ValueError:
+                print("Input must be an integer between 1 and 8.")
+                continue
+        
+        if action == 8:
+            break
 
-            if num_of_actions == 0:
-                print("You are out of actions for the day!")
+        if num_of_actions == 0:
+            print("You are out of actions for the day!")
 
-        except ValueError:
-            print("Input must be an integer between 1 and 8.")
 
+        if idno.cleanliness <= 25:
+            print(f"{idno.name} is too dirty and is getting a little sick.")
+            idno.health -= 10
+            continue
+        if idno.nourishment <= 0:
+            print(f"{idno.name} has starved to death. Game over.")
+            break
+        if idno.health <= 0:
+            print(f"{idno.name} has died of illness. Game over.")
+            break
+        if idno.happiness <= 0:
+            print(f"{idno.name} has become too sad and has run away. Game over.")
+            break
 if __name__ == "__main__":
     main()
