@@ -150,7 +150,7 @@ def get_paid(user_inventory: Inventory, idno: Idno):
     print(f"You've earned {wage} munny!")
 
 def get_idno(idno: Idno):
-    print(f"Here's how {idno.name} is doing:\n{idno.age} days old\nHealth: {idno.health}/100\nHappiness: {idno.happiness}/100\nHunger: {idno.nourishment}/100\nCleanliness: {idno.cleanliness}/100")
+    print(f"Here's how {idno.name} is doing:\n{idno.age} days old\nHealth: {idno.health}/100\nHappiness: {idno.happiness}/100\nNourishment: {idno.nourishment}/100\nCleanliness: {idno.cleanliness}/100")
 
 def create_store_inventory():
 
