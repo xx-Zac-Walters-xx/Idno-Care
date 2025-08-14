@@ -1,6 +1,7 @@
 import random
 from typing import NoReturn, Dict
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
+import json
 
 @dataclass
 class Idno: 
@@ -20,18 +21,14 @@ class Inventory:
     #changed the list to dict to have the item name and quantity
 
 #store inventory and prices stored as dictionaries, open to easier ideas
-# @dataclass
-# class Store:
-#     #dict of tuple format I'm using, the tuple is the item name and cost and the other int is quantity
-#     # toys: dict[tuple[str, int], int]
-#     # medicine: dict[tuple[str, int], int]
-#     # food: dict[tuple[str, int], int]
-#     type: str # food, toys, medicine
-#     name: str # treats, kibble, etc.
-#     price: int
-#     quantity: int
+@dataclass
+class Store_item:
 
-# im crashing out
+    type: str # food, toys, medicine
+    name: str # treats, kibble, etc.
+    price: int
+    quantity: int
+
 
 random_events = ["mess", "sickness", "growth", "sad", "happy"]
 
@@ -73,15 +70,9 @@ def create_idno() -> Idno:
     print(f"Congratulations on your new Idno! Now you must take care of {new_idno.name}.\nYou must feed it and clean it, and monitor its health and happiness.\nAt the end of each day, you get paid your wage.\nIf {new_idno.name} is in good condition, you earn more munny.\nYou can access the shop to buy supplies to care for {new_idno.name}.\nYou can also access your inventory to see what supplies you already own.")
     return new_idno
 
-def create_save_file() -> str:
-    new_file_name = input("New save file name: ")
-    formatted_name = new_file_name.replace(" ", "_")
-    new_file = open(f"{formatted_name}.txt", "w")
-    new_file.close()
-    return f"{formatted_name}.txt"
 
 def save_idno_state(idno: Idno, filename: str):
-    with open(filename, 'w') as file:
+    with open(f"{filename}.txt", 'w') as file:
         file.write(f"{idno.name}\n")
         file.write(f"{idno.age}\n")
         file.write(f"{idno.health}\n")
@@ -89,8 +80,23 @@ def save_idno_state(idno: Idno, filename: str):
         file.write(f"{idno.hunger}\n")
         file.write(f"{idno.cleanliness}\n")
 
+def save_user_inventory(inv: Inventory, filename: str):
+    inv_filename = f"{filename}_inv.json"
+    with open(inv_filename, "w") as f:
+        json.dump(asdict(inv), f, indent=4)
+
+def load_user_inventory(filename: str):
+    inv_filename = f"{filename}_inv.json"
+    try:
+        with open(inv_filename, "r") as f:
+            data = json.load(f)
+        return Inventory(**data)
+    except FileNotFoundError:
+        print("File name not found.")
+
+
 # tweaked this function a little bit
-def load_idno_state(filename: str) -> Idno:
+def load_idno_state(filename: str):
     try:
         with open(f"{filename}.txt", 'r') as file:
             lines = file.readlines()
@@ -105,26 +111,18 @@ def load_idno_state(filename: str) -> Idno:
     except FileNotFoundError:
         print("File name not found.")
 
-def create_user_inventory():
-    user_inventory = Inventory
-    user_inventory.munny = 5
-    user_inventory.toys = {
-        "ball": 0,
-        "squeaky toy": 0,
-        "stuffed toy": 0
-    }
-    user_inventory.medicine = {
-        "weak medicine":0, 
-        "basic medicine":0, 
-        "strong medicine":0, 
-        "xtra strong medicine":0
-    }
-    user_inventory.food = {
-        "treat":0, 
-        "kibble":0, 
-        "steak":0
-    }
-    return user_inventory
+def create_user_inventory() -> Inventory:
+    return Inventory(
+        munny=5,
+        toys={"ball": 0, "squeaky toy": 0, "stuffed toy": 0},
+        medicine={
+            "weak medicine": 0,
+            "basic medicine": 0,
+            "strong medicine": 0,
+            "xtra strong medicine": 0,
+        },
+        food={"treat": 0, "kibble": 0, "steak": 0},
+    )
 
 def get_paid(user_inventory: Inventory, idno_status: Idno):
     #editing so that the happier/healthier idno is, the more money the user earns
@@ -148,51 +146,38 @@ def get_paid(user_inventory: Inventory, idno_status: Idno):
     user_inventory.munny += wage
     print(f"You've earned {wage} munny!")
 
+def get_idno_status(idno: Idno):
+    print(f"""
+          
+Here's how {idno.name} is doing:
+{idno.age} days old
+Health: {idno.health}/100
+Happiness: {idno.happiness}/100
+Hunger: {idno.hunger}/100
+Cleanliness: {idno.cleanliness}/100
+
+""")
+
 def create_store_inventory():
+
+
+
+
+
     #formatted as a dict with a tuple (item name, price): stock quantity,set all at 10 for now can change or randomize later
     # new_store = Store
-    daily_store = []
-    # new_store.toys = {
-    #     ("ball", 1): 10,
-    #     ("squeaky toy", 3): 10,
-    #     ("stuffed toy", 5): 10
-    # }
-    # new_store.medicine = {
-    #     ("weak medicine", 1): 10, 
-    #     ("basic medicine", 3): 10, 
-    #     ("strong medicine", 5): 10, 
-    #     ("xtra strong medicine", 7): 10
-    # }
-    # new_store.food = {
-    #     ("treat", 1): 10, 
-    #     ("kibble", 3): 10, 
-    #     ("steak", 5): 10
-    # }
-
-    # i attempted to reformat the inventory into a list of dictionaries and just get rid of the dataclass element of it
-    # because i couldnt figure out how to access certain values for the process of buying things from the shop in the check_shop() function
-    # its not as pretty as it was before but i got it working soooo
-    ball = {"type": "toys", "name": "ball", "price": 1, "quantity": 10}
-    squeaky_toy = {"type": "toys", "name": "squeaky toy", "price": 3, "quantity": 10}
-    stuffed_toy = {"type": "toys", "name": "stuffed toy", "price": 5, "quantity": 10}
-    weak = {"type": "medicine", "name": "weak medicine", "price": 1, "quantity": 10}
-    basic = {"type": "medicine", "name": "basic medicine", "price": 3, "quantity": 10}
-    strong = {"type": "medicine", "name": "strong medicine", "price": 5, "quantity": 10}
-    xtra_strong = {"type": "medicine", "name": "xtra strong medicine", "price": 7, "quantity": 10}
-    treat = {"type": "food", "name": "treat", "price": 1, "quantity": 10}
-    kibble = {"type": "food", "name": "kibble", "price": 3, "quantity": 10}
-    steak = {"type": "food", "name": "steak", "price": 5, "quantity": 10}
-
-    daily_store.append(ball)
-    daily_store.append(squeaky_toy)
-    daily_store.append(stuffed_toy)
-    daily_store.append(weak)
-    daily_store.append(basic)
-    daily_store.append(strong)
-    daily_store.append(xtra_strong)
-    daily_store.append(treat)
-    daily_store.append(kibble)
-    daily_store.append(steak)
+    
+    ball = Store_item("toys","ball", 1, random.randint(1, 5))
+    squeaky_toy = Store_item("toys", "squeaky toy", 3, random.randint(1, 4))
+    stuffed_toy = Store_item("toys", "stuffed toy", 5, random.randint(1, 3))
+    weak =  Store_item("medicine", "weak medicine", 1, random.randint(1, 5))    
+    basic = Store_item("medicine", "basic medicine", 3, random.randint(1, 4))
+    strong = Store_item("medicine", "strong medicine", 5, random.randint(1, 3))
+    xtra_strong = Store_item("medicine", "xtra strong medicine", 7, 1)
+    treat = Store_item("food", "treat", 1, random.randint(1, 10))
+    kibble = Store_item("food", "kibble", 3, random.randint(1, 5))
+    steak = Store_item("food", "steak", 5, random.randint(1, 2))
+    daily_store = [ball, squeaky_toy, stuffed_toy, weak, basic, strong, xtra_strong, treat, kibble, steak]
 
     return daily_store
 
@@ -200,8 +185,8 @@ def check_shop(user_inventory: Inventory, store_inventory: list, category_name: 
     while True:
         print(f"Available {category_name}:")
         for i in store_inventory:
-            if i["type"] == f"{category_name}":
-                print(f"x{i["quantity"]} {i["name"]}, {i["price"]} munny")
+            if i.type == f"{category_name}":
+                print(f"x{i.quantity} {i.name}, {i.price} munny")
 
         print(f"You have {user_inventory.munny} munny to spend.")
         choice = input(f"Which {category_name} would you like to buy? Enter [exit] to leave the shop.\n> ")
@@ -211,7 +196,7 @@ def check_shop(user_inventory: Inventory, store_inventory: list, category_name: 
         
         item_key = None
         for item in store_inventory:
-            if item["name"].lower() == choice.lower():
+            if item.name.lower() == choice.lower():
                 item_key = item
                 break
                 
@@ -219,15 +204,24 @@ def check_shop(user_inventory: Inventory, store_inventory: list, category_name: 
             print("Invalid choice.")
             continue
 
-        product = item_key["name"]
-        cost = item_key["price"]
-        stock_quantity = item_key["quantity"]
+        product = item_key.name
+        cost = item_key.price
+        stock_quantity = item_key.quantity
 
         
         if stock_quantity > 0:
             if user_inventory.munny >= cost:
                 user_inventory.munny -= cost
-                stock_quantity -= 1
+
+                
+
+                for item in store_inventory:
+                    if product == item.name:
+                        item.quantity -=1
+
+                update_user_inv = getattr(user_inventory, category_name)
+                update_user_inv[product] = update_user_inv.get(product, 0) + 1
+                
                 # I CANNOT FIGURE OUT HOW TO UPDATE THE PRODUCT QUANTITY IN THE USER INVENTORY PLS HELP
                 print(f"You bought {product}!")
                 
@@ -316,7 +310,8 @@ def play_with_idno(user_inventory: Inventory, idno: Idno):
 
 def clean_idno(user_inventory: Inventory, idno: Idno):
     idno.cleanliness += 20 # i need to fix this so that the max is 100 cause we dont need it to be higher than that
-    print(f"{idno.name} is now a bit cleaner!")
+    idno.cleanliness = min(idno.cleanliness, 100)
+    print(f"{idno.name} is now a bit cleaner! Cleanliness is now {idno.cleanliness}/100.")
 
 def administer_medicine(user_inventory: Inventory, idno: Idno):
     while True:
@@ -343,13 +338,13 @@ def administer_medicine(user_inventory: Inventory, idno: Idno):
             continue
 
         print(f"{idno.name} is feeling better after receiving the medicine.")
-        if item_key.lower() == "weak":
+        if item_key.lower() == "weak medicine":
             idno.health += 20                   
-        elif item_key.lower() == "basic":
+        elif item_key.lower() == "basic medicine":
             idno.health += 40
-        elif item_key.lower() == "strong":
+        elif item_key.lower() == "strong medicine":
             idno.health += 60
-        elif item_key.lower() == "xtra strong":
+        elif item_key.lower() == "xtra strong medicine":
             idno.health += 80
         idno.health = max(0, min(idno.health, 100))
 
@@ -357,7 +352,7 @@ def administer_medicine(user_inventory: Inventory, idno: Idno):
 
         print(f"{idno.name}'s health is now {idno.health}/100.")
 
-def check_inventory(user_inventory: Inventory) -> None:
+def check_inventory(user_inventory: Inventory):
     print("Inventory:")
     print(f"Munny: {user_inventory.munny}")
     for item, quantity in user_inventory.medicine.items():
@@ -369,8 +364,8 @@ def check_inventory(user_inventory: Inventory) -> None:
 
 def main():
 
-    # user_inventory = create_user_inventory()
-    # daily_store = create_store_inventory()
+    
+    #daily_store = create_store_inventory()
     # check_shop(user_inventory, daily_store, "food")
     # was just testing functionality of the shopping process, it works until you get to the part where the product would be added to your inventory
 
@@ -380,30 +375,31 @@ def main():
             if logging_in == 1:
                 filename = input("Please enter the name of your existing save file.\n> ")
                 idno = load_idno_state(filename)
+                user_inventory = load_user_inventory(filename)
                 if idno:
                     print(f"Welcome back! {idno.name} missed you.")
                     break
                 else:
-                    filename = create_save_file()
                     idno = create_idno()
                     save_idno_state(idno, filename)
                     break
             elif logging_in == 2:
-                filename = create_save_file()
+                #filename = create_save_file()
+                filename = input("New Save file name: ")
                 idno = create_idno()
                 save_idno_state(idno, filename)
+                user_inventory = create_user_inventory()
+                save_user_inventory(user_inventory, filename)
                 break
             else:
                 print("Input must be either [1] or [2].")
         except ValueError:
             print("Input must be either [1] or [2].")
 
-    user_inventory = create_user_inventory()
-
     num_of_actions = 5
     
     while True:
-        print("It's a new day!")
+        print("\nIt's a new day!")
 
         daily_store = create_store_inventory()
         idno.age += 1
@@ -412,11 +408,15 @@ def main():
         num_of_actions = 5
         random_event_message = get_random_event_message(idno)
         print(f"\n{random_event_message}\n")
-
-        print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
-        action = int(input("> "))
+        
+        #print(f"\nWhat would you like to do? {num_of_actions} actions left.\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
+        #action = int(input("> "))
+        action = 0
         while num_of_actions > 0 and action != 8:
             if num_of_actions > 0:
+                get_idno_status(idno)
+                print(f"\nWhat would you like to do? {num_of_actions} actions left for today.\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
+                action = int(input("> "))
                 if action < 1 or action > 8:
                     print("Invalid action. Please choose a number between 1 and 8.")
                     action = int(input("> "))
@@ -425,32 +425,26 @@ def main():
                     category = input("What are you looking to buy?\n[food]\n[toys]\n[medicine]\n> ")
                     check_shop(user_inventory, daily_store, category)
                     num_of_actions -= 1
-                    print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
-                    action = int(input("> "))
+                    continue
                 elif action == 2:
                     check_inventory(user_inventory)
-                    print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
-                    action = int(input("> "))
+                    continue
                 elif action == 3:
                     feed_idno(user_inventory, idno)
                     num_of_actions -= 1
-                    print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
-                    action = int(input("> "))
+                    continue
                 elif action == 4:
                     clean_idno(user_inventory, idno)
                     num_of_actions -= 1
-                    print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
-                    action = int(input("> "))
+                    continue
                 elif action == 5:
                     play_with_idno(user_inventory, idno)
                     num_of_actions -= 1
-                    print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
-                    action = int(input("> "))
+                    continue
                 elif action == 6:
                     administer_medicine(user_inventory, idno)
                     num_of_actions -= 1
-                    print("\nWhat would you like to do?\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
-                    action = int(input("> "))
+                    continue
                 elif action == 7:
                     print("You have chosen to end the day.")
                     #end day / adjust
@@ -466,6 +460,7 @@ def main():
             print("Ending current day and saving stats...")
             #end day / adjust
             save_idno_state(idno, filename)
+            save_user_inventory(user_inventory, filename)
             break
 
 if __name__ == "__main__":
