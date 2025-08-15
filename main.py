@@ -520,7 +520,7 @@ def main():
                             break
                         else:
                             print("Invalid choice.")
-                            continue
+                            category = input("Please select an appropriate option:\n> ")
                     
 
                     check_shop(user_inventory, daily_store, category) # type: ignore
