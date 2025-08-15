@@ -1,6 +1,8 @@
 import random
 from dataclasses import dataclass, asdict
 import json
+import os
+import sys
 
 @dataclass
 class Idno: 
@@ -349,6 +351,26 @@ def check_inventory(user_inventory: Inventory):
     for item, quantity in user_inventory.food.items():
         print(f"{item}: {quantity} servings")
 
+def end_game(filename: str):
+    if os.path.exists(f"{filename}.txt"):
+        os.remove(f"{filename}.txt")
+        #print(f"The file '{f"{filename}.txt"}' has been deleted.")
+    else:
+        print(f"The file '{f"{filename}.txt"}' does not exist.")
+
+    if os.path.exists(f"{filename}_inv.json"):
+        os.remove(f"{filename}_inv.json")
+        #print(f"'{filename}' has been deleted.")
+    else:
+        print(f"'{filename}' does not exist.")
+
+    print("Your game save has been deleted. Game over")
+
+    sys.exit()
+
+#def delete_save(filename):
+
+
 def main():
 
     while True:
@@ -380,27 +402,60 @@ def main():
         except ValueError:
             print("Input must be either [1] or [2].")
 
-
+    game_over = False
     while True:
-        print("\nIt's a new day!")
-        
-        get_paid(user_inventory, idno)
-        daily_store = create_store_inventory()
-        idno.age += 1
-        idno.nourishment -= 10
-        idno.cleanliness -= 5
-        num_of_actions = 5
-        random_event_message = get_random_event_message(idno)
-        print(f"\n{random_event_message}\n")
+
+        if game_over == False:
+            #print("\nIt's a new day!")
+            
+            get_paid(user_inventory, idno)
+            daily_store = create_store_inventory()
+            idno.age += 1
+            idno.nourishment -= 10
+            idno.cleanliness -= 5
+            num_of_actions = 5
+            random_event_message = get_random_event_message(idno)
+            #print(f"\n{random_event_message}\n")
 
         # print(f"\nWhat would you like to do? {num_of_actions} actions left.\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
         # action = int(input("> "))
 
-        while num_of_actions > 0:
-            try:
+            while num_of_actions > 0 and game_over == False:
+
+                print("\nIt's a new day!\n")
+                if idno.nourishment <= 0:
+                    print(f"{idno.name} has starved to death.")
+                    end_game(filename)
+                    break
+                if idno.health <= 0:
+                    print(f"{idno.name} has died of illness.")
+                    end_game(filename)
+                    break
+                if idno.happiness <= 0:
+                    print(f"{idno.name} has become too sad and has run away.")
+                    end_game(filename)
+                    break
+                if idno.cleanliness <= 25:
+                        print(f"{idno.name} is too dirty and is getting a little sick.")
+                        idno.health -= 10
+
+                
+                print(f"\n{random_event_message}\n")
+                #try:
+                    
+                    
+                    
+
                 get_idno(idno)
                 print(f"\nWhat would you like to do? {num_of_actions} actions left for today.\n[1] check shop\n[2] check inventory\n[3] feed idno\n[4] clean idno\n[5] play with idno\n[6] administer medicine\n[7] end day\n[8] save and exit")
-                action = int(input("> "))
+                action = (input("> "))
+
+                if action.isdigit():
+                    action = int(action)
+                else:
+                    print("Input must be an integer between 1 and 8.")
+                    continue
+
                 if action == 1:
                     category = input("What are you looking to buy?\n[food]\n[toys]\n[medicine]\n> ")
                     check_shop(user_inventory, daily_store, category)
@@ -436,29 +491,33 @@ def main():
                     break
                 else:
                     print("Input must be an integer between 1 and 8.")
-            except ValueError:
-                print("Input must be an integer between 1 and 8.")
-                continue
-        
-        if action == 8:
-            break
+                
+
+
+                    
+                #except ValueError:
+                #    print("Input must be an integer between 1 and 8.")
+                #    continue
+            
+            if action == 8:
+                break
 
         if num_of_actions == 0:
             print("You are out of actions for the day!")
 
 
-        if idno.cleanliness <= 25:
-            print(f"{idno.name} is too dirty and is getting a little sick.")
-            idno.health -= 10
-            continue
-        if idno.nourishment <= 0:
-            print(f"{idno.name} has starved to death. Game over.")
-            break
-        if idno.health <= 0:
-            print(f"{idno.name} has died of illness. Game over.")
-            break
-        if idno.happiness <= 0:
-            print(f"{idno.name} has become too sad and has run away. Game over.")
-            break
+#        if idno.cleanliness <= 25:
+#            print(f"{idno.name} is too dirty and is getting a little sick.")
+#            idno.health -= 10
+#            continue
+#        if idno.nourishment <= 0:
+#            print(f"{idno.name} has starved to death. Game over.")
+#            break
+#        if idno.health <= 0:
+#            print(f"{idno.name} has died of illness. Game over.")
+#            break
+#        if idno.happiness <= 0:
+#            print(f"{idno.name} has become too sad and has run away. Game over.")
+#            break
 if __name__ == "__main__":
     main()
